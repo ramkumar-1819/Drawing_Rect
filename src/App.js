@@ -4,39 +4,52 @@ import './App.css';
 function App() {
   const rect=useRef();
   let clicked=false;
-  let initialX=0;
-  let initialY=0;
-  let parentOffsetX;
-  let parentOffsetY;
+  let left;
+  let top; 
+  let initialX;
+  let initialY;
+  let parent;
+  let child;
+
   const startDrawing=(e)=>{
-    console.log(e.offsetTop)
-    e.stopPropagation();
-    clicked=true;
+    parent=e.target.getBoundingClientRect();
     rect.current.style.display='block';
-    rect.current.style.left=`${e.nativeEvent.offsetX}px`;
-    rect.current.style.top=`${e.nativeEvent.offsetY}px`;
-    parentOffsetX=e.nativeEvent.offsetX;
-    parentOffsetY=e.nativeEvent.offsetY;
+    child=rect.current.getBoundingClientRect();
+    console.log(parent,child)
+    left=e.nativeEvent.offsetX;
+    top=e.nativeEvent.offsetY;
+    rect.current.style.top=`${top}px`;
+    rect.current.style.left=`${left}px`;
     initialX=e.pageX;
     initialY=e.pageY;
+    clicked=true;
   }
   const cursorMove=(e)=>{
+    
     if(clicked){
       if(initialX<e.pageX && initialY<e.pageY){
+        console.log('1')
         rect.current.style.width=`${e.pageX-initialX}px`;
         rect.current.style.height=`${e.pageY-initialY}px`;
       }
       else if(initialX>e.pageX && initialY<e.pageY){
-        const parent=document.getElementsByClassName('App')[0];
-        if(e.target===parent){
-          rect.current.style.left=`${e.nativeEvent.offsetX}px`;
-        }
-        else{
-          console.log('Move',e.nativeEvent.offsetX)
-          rect.current.style.left=`${parentOffsetX-e.nativeEvent.offsetX}px`;
-        }
+        console.log('2')
+        rect.current.style.left=`${e.pageX-parent.left}px`;
         rect.current.style.width=`${initialX-e.pageX}px`;
         rect.current.style.height=`${e.pageY-initialY}px`;
+      }
+      else if(initialX<e.pageX && initialY>e.pageY){
+        console.log('3')
+        rect.current.style.top=`${e.pageY-parent.top}px`;
+        rect.current.style.width=`${e.pageX-initialX}px`;
+        rect.current.style.height=`${initialY-e.pageY}px`;
+      }
+      else if(initialX>e.pageX && initialY>e.pageY){
+        console.log('4')
+        rect.current.style.top=`${e.pageY-parent.top}px`;
+        rect.current.style.left=`${e.pageX-parent.left}px`;
+        rect.current.style.width=`${initialX-e.pageX}px`;
+        rect.current.style.height=`${initialY-e.pageY}px`;
       }
     }
   }
@@ -46,7 +59,9 @@ function App() {
   }
   return (
     <div className="App" onMouseDown={startDrawing} onMouseUp={stopDrawing} onMouseMove={cursorMove}>
-      <div className='rect' ref={rect}></div>
+      <div className='rect' ref={rect}>
+        <span className='left'></span>
+      </div>
     </div>
   );
 }
