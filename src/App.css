@@ -26,6 +26,22 @@
   display: none;
   cursor:e-resize;
 }
+.north,.south{
+  border:1px solid brown;
+  height: 5px;
+  width: 95%;
+  position: absolute;
+  top:-2.5px;
+  left:50%;
+  transform: translateX(-50%);
+  display: none;
+  cursor:n-resize;
+}
+.south{
+  border: 1px solid orangered;
+  top:99%;
+}
 .west{
-  left: -2.5px !important;
+  border: 1px solid blue;
+  right: 99% !important;
 }

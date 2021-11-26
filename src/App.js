@@ -5,6 +5,8 @@ function App() {
   const rect=useRef();
   const east=useRef();
   const west=useRef();
+  const north=useRef();
+  const south=useRef();
 
   let clicked=false;
   let drawn=false;
@@ -19,8 +21,7 @@ function App() {
 
   let eastDrag=false;
   let westDrag=false;
-  let dragging;
-  let leftDrag;
+  let northDrag=false;
 
   //Initiate Drawing
   const startDrawing=(e)=>{
@@ -73,10 +74,15 @@ function App() {
         if(eastDrag){
           if(e.clientX<child['right']){
             if(e.clientX<=child['left']){
-              rect.current.style.left=`${e.clientX-parent.left}px`
+              console.log('D',dimensions['x1'])
+              console.log(e.clientX,parseInt(child['left']))
+              rect.current.style.left=`${dimensions['x1']-(child['left']-e.clientX)}px`
               rect.current.style.width=`${child['left']-e.clientX}px`
             }
             else{
+              if(rect.current.style.left.split('px')[1]!==dimensions['x1']){
+                rect.current.style.left=dimensions['x1']+'px';
+              }
               rect.current.style.width=`${child['width']-(child['right']- e.clientX)}px`;
             }
           }
@@ -85,6 +91,26 @@ function App() {
           }
         }
         break;
+      case 'west':
+        if(westDrag){
+          if(e.clientX>child['left']){
+            if(e.clientX>=child['right']){
+              rect.current.style.left=`${child.right-parent.left}px`
+              rect.current.style.width=`${e.clientX-child['right']}px`
+            }
+            else{
+              rect.current.style.left=`${dimensions['x1']+(e.clientX-child['left'])}px`
+              rect.current.style.width=`${child['width']-(e.clientX-child['left'])}px`
+            }
+          }
+          //move left position
+          else if(e.clientX<child['left']){
+            rect.current.style.left=`${dimensions['x1']-(child['left']-e.clientX)}px`
+            rect.current.style.width=`${(child['left']-e.clientX)+child['width']}px`;
+          }
+        }
+        break;
+    
       default:
         break;
     }
@@ -96,14 +122,20 @@ function App() {
         if(clicked){
           drawn=true;
           clicked=false;
-          leftDrag=true;
           east.current.style.display='block';
           west.current.style.display='block';
+          north.current.style.display='block';
+          south.current.style.display='block';
         }
         break;
       case 'east':
         if(eastDrag){
           eastDrag=false;
+        }
+        break;
+      case 'west':
+        if(westDrag){
+          westDrag=false;
         }
         break;
       default:
@@ -128,13 +160,17 @@ function App() {
   }
   //West Side Dragging.
   const westDraggingStart=(e)=>{
-
+    child=rect.current.getBoundingClientRect();
+    westDrag=true;
+    type='west';
   }
   return (
     <div className="App" onMouseDown={startDrawing} onMouseUp={stopDrawing} onMouseMove={cursorMove}>
       <div className='rect' ref={rect}>
         <span className='east' ref={east} onMouseDown={eastDraggingStart}></span>
         <span className='west' ref={west} onMouseDown={westDraggingStart}></span>
+        <span className='north' ref={north}></span>
+        <span className='south' ref={south}></span>
       </div>
     </div>
   );
