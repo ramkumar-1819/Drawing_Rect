@@ -1,7 +1,5 @@
 *{
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  
 }
 .App {
   border:2px solid red;
@@ -16,15 +14,18 @@
   border:1px solid black;
   position: absolute;
   display: none;
- 
 }
-.left{
+.east,.west{
   border: 1px solid green;
   width: 5px;
-  height: 75%;
+  height: 95%;
   position: absolute;
-  right: 0;
+  right: -2.5px;
   top: 50%;
   transform: translateY(-50%);
-  display: block;
+  display: none;
+  cursor:e-resize;
+}
+.west{
+  left: -2.5px !important;
 }
