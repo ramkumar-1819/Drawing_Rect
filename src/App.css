@@ -2,7 +2,7 @@
   
 }
 .App {
-  border:2px solid red;
+  background: yellow;
   width:500px;
   height: 500px;
   position: absolute;
@@ -16,7 +16,6 @@
   display: none;
 }
 .east,.west{
-  border: 1px solid green;
   width: 5px;
   height: 95%;
   position: absolute;
@@ -27,7 +26,6 @@
   cursor:e-resize;
 }
 .north,.south{
-  border:1px solid brown;
   height: 5px;
   width: 95%;
   position: absolute;
@@ -38,10 +36,30 @@
   cursor:n-resize;
 }
 .south{
-  border: 1px solid orangered;
   top:99%;
 }
 .west{
-  border: 1px solid blue;
   right: 99% !important;
+}
+.northEast,.northWest,.southEast,.southWest{
+  width: 3%;
+  height: 5px;
+  position: absolute;
+  right: -1%;
+  top:-1%;
+  display: none;
+  cursor: ne-resize;
+}
+.northWest{
+  right: 98% !important;
+  cursor: nw-resize !important;
+}
+.southEast{
+  top:98.5% !important;
+  cursor: se-resize !important;
+}
+.southWest{
+  right: 98% !important;
+  top:98.5% !important;
+  cursor: sw-resize !important;
 }
