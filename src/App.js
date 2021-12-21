@@ -1,370 +1,145 @@
-import React, { useRef, useEffect } from 'react';
 import './App.css';
+import { useEffect,useRef,useState } from 'react';
+import Component1 from './Component1';
+import Component2 from './Component2';
+import Draggable from 'react-draggable';
+import { Stage, Layer, Rect, Transformer } from "react-konva";
 
 function App() {
-  const rect=useRef();
-  const east=useRef();
-  const west=useRef();
-  const north=useRef();
-  const south=useRef();
-  const northWest=useRef();
-  const northEast=useRef();
-  const southWest=useRef();
-  const southEast=useRef();
-
-  useEffect(()=>{
-    window.addEventListener('mouseup',mouseRelease);
-    return ()=>window.removeEventListener('mouseup',mouseRelease);
+  const [coords,setCoords] = useState({top:0,left:0,right:0,bottom:0})
+    return(<>
+    <Component2 leftt={`${coords.left}px`} topp={`${coords.top}px`} width={`${coords.right-coords.left}px`} height={`${coords.bottom - coords.top}px`} details={false}/>
+    <button type='button' onClick={()=>setCoords({top:50,left:50,right:120,bottom:120})}>Clicke</button>
+    </>)
+}
+export default App;
+//
+/*useEffect(()=>{
+    trRef.current.setNode(shapeRef.current);
+    console.log(shapeRef);
+    document.querySelector('canvas').style.border='1px solid red';
   },[])
   
-  let rect_progress=false;
-  let mouse_leaved=false;
-  let clicked=false;
-  let drawn=false;
-  let left;
-  let top; 
-  let initialX;
-  let initialY;
-  let parent;
-  let child;
-  let dimensions={};
-  let type='initial';
+  function getTotalBox(boxes) {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
 
-  let eastDrag=false;
-  let westDrag=false;
-  let northDrag=false;
-  let southDrag=false;
-  let northWestDrag=false;
-  let northEastDrag=false;
-  let southWestDrag=false;
-  let southEastDrag=false;
+    boxes.forEach((box) => {
+      minX = Math.min(minX, box.x);
+      minY = Math.min(minY, box.y);
+      maxX = Math.max(maxX, box.x + box.width);
+      maxY = Math.max(maxY, box.y + box.height);
+    });
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY,
+    };
+  }
+
+  const dm =()=>{
+    const boxes = trRef.current.nodes().map((node) =>{ return(node.getClientRect())});
+        const box = getTotalBox(boxes);
+        console.log(box);
+        console.log(stage.current.width())
+        trRef.current.nodes().forEach((shape) => {
+        
+          const absPos = shape.getAbsolutePosition();
+          // where are shapes inside bounding box of all shapes?        
+          //console.log(shape)
+          const offsetX = box.x - absPos.x;
+          const offsetY = box.y - absPos.y;
+          //console.log('b',box)
+
+          // we total box goes outside of viewport, we need to move absolute position of shape
+          const newAbsPos = { ...absPos };
+          if (box.x < 0) {
+            newAbsPos.x = -box.x;
+          }
+          if (box.y < 0) {
+            newAbsPos.y = -box.y;
+          }
+          if (box.x + box.width > stage.current.width()) {
+            newAbsPos.x = stage.current.width() - box.width - offsetX;
+          }
+          if (box.y + box.height > stage.current.height()) {
+            newAbsPos.y = stage.current.height() - box.height - offsetY;
+          }
+          shape.setAbsolutePosition(newAbsPos);
+        });
+  }
+
+  const stage = useRef();
+  const shapeRef = useRef();
+  const trRef = useRef();
   
-  const mouseRelease=()=>{
-    if(rect_progress==='initial' && mouse_leaved){
-      initialStop()
-    }
-    mouse_leaved=false;
-    rect_progress="";
-  }
-  //Initiate Drawing
-  const startDrawing=(e)=>{
-    if(!drawn){
-      parent=e.target.getBoundingClientRect();
-      rect.current.style.display='block';
-      child=rect.current.getBoundingClientRect();
-      left=e.nativeEvent.offsetX;
-      top=e.nativeEvent.offsetY;
-      rect.current.style.top=`${top}px`;
-      rect.current.style.left=`${left}px`;
-      initialX=e.clientX;
-      initialY=e.clientY;
-      clicked=true;
-    }
-  }
-  //Continue Drawing.
-  const cursorMove=(e)=>{
-    switch(type){
-      case 'initial':
-        if(clicked){
-          initialDrawing(e);
-        }
-        break;
-      case 'east':
-        if(eastDrag){
-         eastFunction(e)
-        }
-        break;
-      case 'west':
-        if(westDrag){
-          westFunction(e)
-        }
-        break;
-      case 'north':
-        if (northDrag){
-          northFunction(e)
-        }
-        break;
-      case 'south':
-        if (southDrag){
-            southFunction(e)
-        }
-        break;
-      case 'northWest':
-        if(northWestDrag){
-          northFunction(e)
-          westFunction(e)
-        }
-        break;
-      case 'northEast':
-        if(northEastDrag){
-          northFunction(e)
-          eastFunction(e)
-        }
-        break;
-      case 'southEast':
-        if(southEastDrag){
-          southFunction(e)
-          eastFunction(e)
-        }
-        break; 
-      case 'southWest':
-        if(southWestDrag){
-          southFunction(e)
-          westFunction(e)
-        }
-        break; 
-      default:
-        break;
-    }
-  }
-  
-  //Finish Drawing.
-  const stopDrawing=(e)=>{
-    switch(type){
-      case 'initial':
-        if(clicked){
-         initialStop();
-        }
-        break;
-      case 'east':
-        if(eastDrag){
-          eastDrag=false;
-        }
-        break;
-      case 'west':
-        if(westDrag){
-          westDrag=false;
-        }
-        break;
-      case 'north':
-        if(northDrag){
-          northDrag=false;
-        }
-        break;
-      case 'south':
-        if(southDrag){
-          southDrag=false;
-        }
-        break;
-      case 'northWest':
-        if(northWestDrag){
-          northWestDrag=false;
-        }
-        break;
-      case 'northEast':
-        if(northEastDrag){
-          northEastDrag=false;
-        }
-        break;
-      case 'southWest':
-        if(southWestDrag){
-          southWestDrag=false;
-        }
-        break;
-      case 'southEast':
-      if(southEastDrag){
-        southEastDrag=false;
-      }
-      break;
-      default:    
-        break;
-    }
-    child=rect.current.getBoundingClientRect();
-    dimensions['x1']=rect.current.offsetLeft;
-    dimensions['y1']=rect.current.offsetTop;
-    dimensions['x2']=child.width + rect.current.offsetLeft;
-    dimensions['y2']=rect.current.offsetTop;
-    dimensions['x3']=rect.current.offsetLeft;
-    dimensions['y3']=child.height + rect.current.offsetTop;
-    dimensions['x4']=child.width + rect.current.offsetLeft;
-    dimensions['y4']=child.height + rect.current.offsetTop;
-    rect_progress="";
+  function getCorner(pivotX, pivotY, diffX, diffY, angle) {
+    const distance = Math.sqrt(diffX * diffX + diffY * diffY);
+    /// find angle from pivot to corner
+    angle += Math.atan2(diffY, diffX);
+    /// get new x and y and round it off to integer
+    const x = pivotX + distance * Math.cos(angle);
+    const y = pivotY + distance * Math.sin(angle);
+    return { x: x, y: y };
   }
 
-  const initialDrawing=(e)=>{
-    rect_progress='initial';
-    if(initialX<e.clientX && initialY<e.clientY){
-      if(Math.floor(parent['left'])<e.clientX && Math.floor(parent['right'])>e.clientX && Math.floor(parent['bottom'])>e.clientY && Math.floor(parent['top'])<e.clientY){
-        console.log('1')
-        rect.current.style.width=`${e.clientX-initialX}px`;
-        rect.current.style.height=`${e.clientY-initialY}px`;
-      }
-    }
-    else if(initialX>e.clientX && initialY<e.clientY){
-      if(Math.floor(parent['left'])<e.clientX && Math.floor(parent['right'])>e.clientX && Math.floor(parent['bottom'])>e.clientY && Math.floor(parent['top'])<e.clientY){
-        console.log('2')
-        rect.current.style.left=`${e.clientX-parent.left}px`;
-        rect.current.style.width=`${initialX-e.clientX}px`;
-        rect.current.style.height=`${e.clientY-initialY}px`;
-      }
-    }
-    else if(initialX<e.clientX && initialY>e.clientY){
-      if(Math.floor(parent['left'])<e.clientX && Math.floor(parent['right'])>e.clientX && Math.floor(parent['bottom'])>e.clientY && Math.floor(parent['top'])<e.clientY){
-        console.log('3')
-        rect.current.style.top=`${e.clientY-parent.top}px`;
-        rect.current.style.width=`${e.clientX-initialX}px`;
-        rect.current.style.height=`${initialY-e.clientY}px`;
-      }
-    }
-    else if(initialX>e.clientX && initialY>e.clientY){
-      if(Math.floor(parent['left'])<e.clientX && Math.floor(parent['right'])>e.clientX && Math.floor(parent['bottom'])>e.clientY && Math.floor(parent['top'])<e.clientY){
-        console.log('4')
-        rect.current.style.top=`${e.clientY-parent.top}px`;
-        rect.current.style.left=`${e.clientX-parent.left}px`;
-        rect.current.style.width=`${initialX-e.clientX}px`;
-        rect.current.style.height=`${initialY-e.clientY}px`;
-      }
-    }
+  function getClientRect(rotatedBox) {
+    const { x, y, width, height } = rotatedBox;
+    const rad = rotatedBox.rotation;
+
+    const p1 = getCorner(x, y, 0, 0, rad);
+    const p2 = getCorner(x, y, width, 0, rad);
+    const p3 = getCorner(x, y, width, height, rad);
+    const p4 = getCorner(x, y, 0, height, rad);
+
+    const minX = Math.min(p1.x, p2.x, p3.x, p4.x);
+    const minY = Math.min(p1.y, p2.y, p3.y, p4.y);
+    const maxX = Math.max(p1.x, p2.x, p3.x, p4.x);
+    const maxY = Math.max(p1.y, p2.y, p3.y, p4.y);
+
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY,
+    };
   }
 
-  const initialStop=()=>{
-    drawn=true;
-    clicked=false;
-    rect_progress="";
-    east.current.style.display='block';
-    west.current.style.display='block';
-    north.current.style.display='block';
-    south.current.style.display='block';
-    northWest.current.style.display='block';
-    northEast.current.style.display='block';
-    southEast.current.style.display='block';
-    southWest.current.style.display='block';
-  }
+  return(<Stage width={500} height={500} ref={stage}>
+    <Layer>
+      <Rect
+        x={20}
+        y={50}
+        width={100}
+        height={100}
+        fill="red"
+        draggable
+        onDragMove={dm}
+        ref={shapeRef}
+      />
+      <Transformer
+      ref={trRef}
+       rotateEnabled={false}
+       anchorSize={5}
+       boundBoxFunc={ (oldBox, newBox) => {
+        const box = getClientRect(newBox);
+        console.log(box);
+        const isOut =
+          box.x < 0 ||
+          box.y < 0 ||
+          box.x + box.width > stage.current.width() ||
+          box.y + box.height > stage.current.height();
 
-  const northFunction=(e)=>{
-    if(e.clientY>child['top']){
-      if(e.clientY>=child['bottom']){
-        rect.current.style.top=`${dimensions['y3']}px`
-        rect.current.style.height=`${e.clientY-child['bottom']}px`
-      }
-      else{
-        rect.current.style.top=`${dimensions['y1']+(e.clientY-child['top'])}px`
-        rect.current.style.height=`${child['height']-(e.clientY-child['top'])}px`
-      }
-    }
-    else{
-      rect.current.style.top=`${dimensions['y1']+(e.clientY-child['top'])}px`
-      rect.current.style.height=`${(child['top']-e.clientY)+child['height']}px`
-    }
-  }
-  const southFunction=(e)=>{
-    if(e.clientY>child['top']){
-      if(e.clientY>=child['bottom']){
-        rect.current.style.height=`${child['height']+(e.clientY-child['bottom'])}px`
-      }
-      else{
-        if(rect.current.style.top.split('px')[1]!==dimensions['y1']){
-          rect.current.style.top=dimensions['y1']+'px';
+        // if new bounding box is out of visible viewport, let's just skip transforming
+        // this logic can be improved by still allow some transforming if we have small available space
+        if (isOut) {
+          return oldBox;
         }
-        rect.current.style.height=`${child['height']-(child['bottom']-e.clientY)}px`
-      }
-    }
-    else{
-      rect.current.style.top=`${dimensions['y1']-(child['top']-e.clientY)}px`
-      rect.current.style.height=`${(child['top']-e.clientY)}px`
-    }
-  }
-  const eastFunction=(e)=>{
-    if(e.clientX<child['right']){
-      if(e.clientX<=child['left']){
-        rect.current.style.left=`${dimensions['x1']-(child['left']-e.clientX)}px`
-        rect.current.style.width=`${child['left']-e.clientX}px`
-      }
-      else{
-        if(rect.current.style.left.split('px')[1]!==dimensions['x1']){
-          rect.current.style.left=dimensions['x1']+'px';
-        }
-        rect.current.style.width=`${child['width']-(child['right']- e.clientX)}px`;
-      }
-    }
-    else if(e.clientX>child['right']){
-      rect.current.style.width=`${(e.clientX-child['right'])+child['width']}px`;
-    }
-  }
-  const westFunction=(e)=>{
-    if(e.clientX>child['left']){
-      if(e.clientX>=child['right']){
-        rect.current.style.left=`${dimensions['x2']}px`
-        rect.current.style.width=`${e.clientX-child['right']}px`
-      }
-      else{
-        rect.current.style.left=`${dimensions['x1']+(e.clientX-child['left'])}px`
-        rect.current.style.width=`${child['width']-(e.clientX-child['left'])}px`
-      }
-    }
-    else if(e.clientX<child['left']){
-      rect.current.style.left=`${dimensions['x1']-(child['left']-e.clientX)}px`
-      rect.current.style.width=`${(child['left']-e.clientX)+child['width']}px`;
-    }
-  }
-
-
-  //East Side Dragging
-  const eastDraggingStart=(e)=>{
-    child=rect.current.getBoundingClientRect();
-    eastDrag=true;
-    type='east';
-  }
-  //West Side Dragging.
-  const westDraggingStart=(e)=>{
-    child=rect.current.getBoundingClientRect();
-    westDrag=true;
-    type='west';
-  }
-  //North Side Dragging.
-  const northDragggingStart=(e)=>{
-    child=rect.current.getBoundingClientRect();
-    northDrag=true;
-    type='north';
-  }
-  //South Side Dragging.
-  const southDraggingStart=(e)=>{
-    child=rect.current.getBoundingClientRect();
-    southDrag=true;
-    type='south';
-  }
-  //North-West Dragging.
-  const northWestDraggingStart=(e)=>{
-    child=rect.current.getBoundingClientRect();
-    northWestDrag=true;
-    type='northWest';
-  }
-  //North-East Dragging.
-  const northEastDraggingStart=(e)=>{
-    child=rect.current.getBoundingClientRect();
-    northEastDrag=true;
-    type='northEast';
-  }
-  //South-West Dragging.
-  const southWestDraggingStart=(e)=>{
-    child=rect.current.getBoundingClientRect();
-    southWestDrag=true;
-    type='southWest';
-  }
-  //South-East Dragging.
-  const southEastDraggingStart=(e)=>{
-    child=rect.current.getBoundingClientRect();
-    southEastDrag=true;
-    type='southEast';
-  }
-  const leave=(e)=>{
-    console.log('Leave')
-   mouse_leaved=true;
-  }
-  return (
-    <div className="App" onMouseDown={startDrawing} onMouseUp={stopDrawing} onMouseMove={cursorMove} onMouseLeave={leave}>
-      <div className='rect' ref={rect}>
-        <span className='east' ref={east} onMouseDown={eastDraggingStart}></span>
-        <span className='west' ref={west} onMouseDown={westDraggingStart}></span>
-        <span className='north' ref={north} onMouseDown={northDragggingStart}></span>
-        <span className='south' ref={south} onMouseDown={southDraggingStart}></span>
-        <span className='northWest' ref={northWest} onMouseDown={northWestDraggingStart}></span>
-        <span className='northEast' ref={northEast} onMouseDown={northEastDraggingStart}></span>
-        <span className='southWest' ref={southWest} onMouseDown={southWestDraggingStart}></span>
-        <span className='southEast' ref={southEast} onMouseDown={southEastDraggingStart}></span>
-      </div>
-    </div>
-  );
-}
-
-export default App;
+        return newBox;
+      }}
+      />
+    </Layer>
+  </Stage>) */
